@@ -1,6 +1,8 @@
 const stage=root.querySelector('.pg-stage'),gpuCanvas=root.querySelector('[data-gpu]'),cpuImage=root.querySelector('[data-cpu]'),renderStatus=root.querySelector('[data-render-status]'),pauseButton=root.querySelector('[data-pause]'),playButton=root.querySelector('[data-play]'),motion=root.querySelector('[data-motion]'),flyButton=root.querySelector('[data-fly]'),resumeFly=root.querySelector('[data-resume-fly]'),fullscreenButton=root.querySelector('[data-fullscreen]');
 const parts=[...unpack(packed),...makeGateContext()],initialPose={stroke:0,angle:0,turn:0};
 const partLabels={postTube:'Fixed post',gateTube:'Gate tube',outsidePlate:'Outside plate',insidePlate:'Inside plate',keypad:'Keypad + knob',lockCase:'Inside lock case',actuator:'Inside actuator',bolt:'Sliding bolt',keeper:'Keeper',postStop:'Post stop',gateStop:'Gate stop'};
+const partFinishes={postTube:[0],gateTube:[1],outsidePlate:[2],insidePlate:[17],keypad:[8,19,9,20],lockCase:[3],actuator:[7],bolt:[4],keeper:[5],postStop:[6],gateStop:[18]};
+const originalRoughness=materials.map(m=>m[4]);
 const partVisibility={...Object.fromEntries(Object.keys(partLabels).map(k=>[k,true])),fullGate:false,fullPost:false,pickets:false};
 let background=[232,234,237],az=-.35,el=.16,zoom=1,seq=0,quality='balanced',paused=false,playing=false,drag=null,visible=true;
 let samples=0,backend='CPU',gpu=null,scene=null,camera=null,sceneDirty=true,renderJob=0,debounce=0,previewJob=0,animationJob=0,lastPose='',imageData=null,accum=null,pixel=0,renderW=0,renderH=0;
@@ -161,7 +163,18 @@ playButton.addEventListener('click',()=>{
 motion.addEventListener('input',()=>{stopPlaying();seq=Number(motion.value);lastPose='';requestPreview();});
 root.querySelector('[data-light]').addEventListener('input',e=>{setLights(Number(e.target.value));root.querySelector('[data-light-readout]').textContent=e.target.value+'°';requestPreview();});
 const partsBox=root.querySelector('[data-parts]');for(const [key,label] of Object.entries(partLabels)){
- const row=document.createElement('label');row.className='form-check';const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='form-check-input';input.dataset.part=key;const text=document.createElement('span');text.className='form-check-label';text.textContent=label;row.append(input,text);partsBox.appendChild(row);
+ const item=document.createElement('div');
+ const row=document.createElement('label');row.className='form-check';const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='form-check-input';input.dataset.part=key;const text=document.createElement('span');text.className='form-check-label';text.textContent=label;row.append(input,text);item.appendChild(row);
+ const ids=partFinishes[key],initial=Math.round((1-originalRoughness[ids[0]])*100);
+ const caption=document.createElement('label');caption.className='form-label text-small pg-finish-label';caption.htmlFor=root.id+'-shine-'+key;
+ const output=document.createElement('output');output.className='tabular-nums';output.value=initial+'%';caption.append('Shininess',output);
+ const slider=document.createElement('input');slider.type='range';slider.className='form-range';slider.id=caption.htmlFor;slider.dataset.shininess=key;slider.min='0';slider.max='100';slider.step='1';slider.value=String(initial);slider.setAttribute('aria-label',label+' shininess');slider.setAttribute('aria-valuetext',initial+'% shininess');output.htmlFor=slider.id;
+ slider.addEventListener('input',()=>{
+  const value=Number(slider.value),delta=(value-initial)/100;
+  for(const id of ids)materials[id][4]=Math.max(.04,Math.min(1,originalRoughness[id]-delta));
+  output.value=value+'%';slider.setAttribute('aria-valuetext',value+'% shininess');requestPreview();
+ });
+ item.append(caption,slider);partsBox.appendChild(item);
  input.addEventListener('change',()=>{partVisibility[key]=input.checked;sceneDirty=true;root.querySelector('[data-part-count]').textContent=String(Object.keys(partLabels).filter(k=>partVisibility[k]).length);requestPreview();});
 }
 root.querySelectorAll('[data-context]').forEach(input=>input.addEventListener('change',()=>{partVisibility[input.dataset.context]=input.checked;sceneDirty=true;if(!flyMode){fitPending=true;zoom=1;}requestPreview();}));

@@ -10,8 +10,8 @@ uniform sampler2D triangles,nodes,previous,skyMap;
 uniform int nodeCount,sampleCount;
 uniform vec2 resolution,film;
 uniform vec3 cameraCenter,cameraRight,cameraUp,cameraNormal;
-uniform vec4 matBase[17];
-uniform float matRough[17];
+uniform vec4 matBase[${materials.length}];
+uniform float matRough[${materials.length}];
 uniform vec3 sunDirection;
 uniform float skyRotation,cameraDistance,groundZ;
 const float PI=3.141592653589793;
@@ -123,8 +123,8 @@ void main(){vec3 q=position-eye;float z=-dot(q,cameraNormal);gl_Position=vec4(do
 const rasterFragmentSource=`#version 300 es
 ${rasterCommon}
 uniform vec3 eye;
-uniform vec4 matBase[17];
-uniform float matRough[17];
+uniform vec4 matBase[${materials.length}];
+uniform float matRough[${materials.length}];
 in vec3 worldPosition,worldNormal;
 flat in int materialId;
 out vec4 outColor;

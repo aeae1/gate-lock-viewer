@@ -11,6 +11,8 @@ const materials=[
  [.028,.037,.045,0,.50], [.22,.24,.27,0,.78],
  [.955,.50,.32,1,.16], [.285,.038,.022,0,.72], [.235,.030,.018,0,.65]
 ];
+// Separate finishes for parts that used to share a material.
+materials.push(...[2,6,3,7].map(id=>materials[id].slice()));
 function unpack(c){
  const decode=(s,kind)=>{const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new kind(a.buffer)};
  return c.parts.map(p=>{const v=decode(p[5],Int16Array),n=decode(p[6],Int8Array),t=decode(p[7],Uint16Array);return {name:p[0],group:p[1],moving:!!p[2],turn:!!p[3],inferred:!!p[4],v:Float32Array.from(v,x=>x/100),n:Float32Array.from(n,x=>x/127),t}});
@@ -19,8 +21,10 @@ function matId(p){
  if(p.material!==undefined)return p.material;
  const g=p.group;
  if(g==='frame')return p.moving?1:0;
- if(g==='mount')return 2;if(g==='actuator')return 7;if(g==='lock')return p.turn?7:3;
- return ({bolt:4,keeper:5,stop:6,keypad:8,key:9,gasket:10,letter:10,section:11,tube_inner:12})[g]??3;
+ if(g==='mount')return p.name.includes('outside')?2:17;
+ if(g==='actuator')return 7;if(g==='lock')return p.inferred?(p.turn?20:19):3;
+ if(g==='stop')return p.moving?18:6;
+ return ({bolt:4,keeper:5,keypad:8,key:9,gasket:10,letter:10,section:11,tube_inner:12})[g]??3;
 }
 function posePoint(v,p,pose,normal=false){
  let q=v;

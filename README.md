@@ -36,6 +36,8 @@ Fly speeds are **Slow: 180**, **Normal: 600** (default), and **Fast: 1,800** mod
 
 The view buttons preserve the selected navigation mode. Part checkboxes, full-gate checkboxes, opening animation, sky rotation, render detail and rendering pause are available below or above the scene.
 
+Expand **Mechanism parts** to adjust each part's **Shininess** from matte (0%) to polished (100%). Each slider starts at the current finish, changes the preview immediately, and restarts progressive refinement. The plates, stops, keypad, inside lock case and actuator have independent finishes. The tube controls also affect the full frame and posts. Colors, metal types, lettering and cutaway surfaces are preserved. Adjustments stay in the current view until the page is reloaded.
+
 ## Rendering
 
 The viewer draws a fast rasterized preview during movement, then progressively path traces the stationary view. WebGL2 is used when available; a software graphics device or CPU fallback is identified in the graphics details. A browser's GPU preference is a hint, not a guarantee that it will choose a particular device.
