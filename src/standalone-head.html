@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gate mechanism — interactive 3D viewer</title>
+<style>
+:root{color-scheme:light dark;--background:light-dark(#f5f6f8,#1a1c20);--foreground:light-dark(#24262b,#eceef2);--muted-foreground:light-dark(#60656e,#b3b9c2);--border:light-dark(#cdd1d8,#555b65);--control:light-dark(#ffffff,#2a2e35);--primary:light-dark(#272b33,#e4e8ef);--primary-foreground:light-dark(#ffffff,#1b1e24);font:14px/1.45 system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--background);color:var(--foreground)}
+main{max-width:1200px;margin:0 auto}
+.viz-controls,.viz-row{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.btn,.form-select{font:inherit;color:var(--foreground);background:var(--control);border:1px solid var(--border);border-radius:7px;padding:8px 12px}
+.btn{cursor:pointer}.btn[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground)}
+.form-check{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.form-check-input{width:16px;height:16px;margin:0;accent-color:var(--primary)}
+.form-label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.form-range{display:block;width:100%;margin:12px 0;accent-color:var(--primary)}
+.text-small{font-size:12px}.text-muted{color:var(--muted-foreground)}
+.tabular-nums{font-variant-numeric:tabular-nums}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+summary{cursor:pointer;padding:5px 0}
+@media(pointer:coarse){.btn,.form-select,summary{min-height:44px}.form-check{min-height:44px}}
+@media(max-width:480px){body{padding:10px}}
+</style>
+</head>
+<body><main>

@@ -1,0 +1,71 @@
+<div id="gate-polished-viewer">
+  <div class="viz-controls pg-toolbar" aria-label="View controls">
+    <button class="btn" type="button" data-view="inside" aria-pressed="false">Bolt side</button>
+    <button class="btn" type="button" data-view="outside" aria-pressed="true">Keypad side</button>
+    <button class="btn" type="button" data-view="top" aria-pressed="false">Above</button>
+    <button class="btn" type="button" data-view="open" aria-pressed="false">Opening</button>
+    <button class="btn" type="button" data-fly aria-pressed="true">Exit fly</button>
+    <button class="btn" type="button" data-fullscreen aria-pressed="false">Fullscreen</button>
+  </div>
+  <div class="viz-controls" aria-label="Whole gate context">
+    <label class="form-check"><input class="form-check-input" type="checkbox" data-context="fullGate"><span class="form-check-label">Full gate frame</span></label>
+    <label class="form-check"><input class="form-check-input" type="checkbox" data-context="fullPost"><span class="form-check-label">Full posts</span></label>
+    <label class="form-check"><input class="form-check-input" type="checkbox" data-context="pickets"><span class="form-check-label">Pickets + rails</span></label>
+  </div>
+  <div class="pg-stage" role="group" aria-label="Gate mechanism. Fly mode is on. Click the view for WASD movement. Shift or E moves toward the top of the view; Control or Q moves toward the bottom.">
+    <canvas data-gpu role="img" aria-label="Gate mechanism cutaway with a single rotating actuator, flush keypad, rounded edges, and outdoor lighting."></canvas>
+    <img data-cpu alt="Gate mechanism preview and progressive CPU rendering.">
+    <div class="pg-resume"><button class="btn" type="button" data-resume-fly>Click to move</button></div>
+  </div>
+  <div class="pg-footer">
+    <div class="viz-row"><span data-render-status class="text-small tabular-nums" aria-label="Render status">Preparing view…</span></div>
+    <div class="text-small text-muted" data-controls-hint>Fly mode · Click the view to use WASD</div>
+    <div class="text-small text-muted" data-display-note aria-live="polite"></div>
+    <span class="sr-only" data-announcement aria-live="polite">Mechanism view ready.</span>
+    <div class="viz-controls">
+      <button class="btn" type="button" data-pause aria-pressed="false">Pause rendering</button>
+      <button class="btn" type="button" data-play>Play mechanism</button>
+      <label class="form-label">Detail <select class="form-select" data-quality aria-label="Render detail"><option value="balanced">Balanced</option><option value="sharp">Sharp</option><option value="ultra">Ultra</option></select></label>
+      <label class="form-label" data-flight-speed>Fly speed <select class="form-select" data-speed aria-label="Fly speed"><option value="180">Slow</option><option value="600" selected>Normal</option><option value="1800">Fast</option></select></label>
+    </div>
+    <details class="pg-parts"><summary class="cursor-interaction">Mechanism parts · <span data-part-count>11</span> visible</summary><div class="pg-part-list" data-parts aria-label="Visible mechanism parts"></div></details>
+    <div class="pg-sliders">
+      <div><label class="form-label" for="flight-motion">Opening <output data-motion-readout class="tabular-nums">Bolt 0 mm · Gate 0°</output></label><input class="form-range" id="flight-motion" data-motion type="range" min="0" max="16" step="0.05" value="0"></div>
+      <div><label class="form-label" for="flight-light">Sky rotation <output data-light-readout class="tabular-nums">0°</output></label><input class="form-range" id="flight-light" data-light type="range" min="-180" max="180" step="5" value="0"></div>
+    </div>
+    <details class="pg-device text-small"><summary class="cursor-interaction" data-graphics-label>Graphics: checking…</summary><div data-device></div></details>
+  </div>
+</div>
+<style>
+#gate-polished-viewer .pg-stage{position:relative;height:520px;width:100%;touch-action:none;cursor:grab;margin:8px 0;overflow:hidden}
+#gate-polished-viewer .pg-stage canvas,#gate-polished-viewer .pg-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+#gate-polished-viewer .pg-stage.pg-flying{cursor:grab}
+#gate-polished-viewer .pg-stage.pg-dragging{cursor:grabbing}
+#gate-polished-viewer .pg-resume{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;pointer-events:none}
+#gate-polished-viewer .pg-resume button{pointer-events:auto}
+#gate-polished-viewer .pg-sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:12px}
+#gate-polished-viewer .pg-part-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px 16px;padding:12px 0}
+#gate-polished-viewer .pg-parts{margin:8px 0}
+#gate-polished-viewer .pg-device{margin-top:8px;overflow-wrap:anywhere}
+#gate-polished-viewer [data-display-note]:empty{display:none}
+#gate-polished-viewer [hidden]{display:none!important}
+#gate-polished-viewer[data-expanded="true"] .pg-stage{height:720px}
+#gate-polished-viewer:fullscreen{display:flex;flex-direction:column;box-sizing:border-box;width:100%;height:100%;padding:12px 20px;background:var(--background);color:var(--foreground)}
+#gate-polished-viewer:fullscreen .pg-stage{flex:1;min-height:160px;height:auto}
+#gate-polished-viewer:fullscreen .pg-toolbar{flex:none}
+#gate-polished-viewer:fullscreen .pg-footer{flex:none;max-height:42%;overflow:auto}
+@media(max-width:480px){#gate-polished-viewer .pg-stage{height:410px}#gate-polished-viewer .pg-sliders{grid-template-columns:1fr;gap:8px}}
+</style>
+<script>
+(()=>{
+const root=document.getElementById('gate-polished-viewer');
+if(!root)return;
+const packed=__PACKED_MODEL__;
+const skyAsset=__SKY_ASSET__;
+const fullLatch=__FULL_LATCH__;
+__ENGINE__
+__CONTEXT__
+__GPU__
+__UI__
+})();
+</script>
