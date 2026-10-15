@@ -1,4 +1,4 @@
-const stage=root.querySelector('.pg-stage'),gpuCanvas=root.querySelector('[data-gpu]'),cpuImage=root.querySelector('[data-cpu]'),renderStatus=root.querySelector('[data-render-status]'),pauseButton=root.querySelector('[data-pause]'),playButton=root.querySelector('[data-play]'),motion=root.querySelector('[data-motion]'),flyButton=root.querySelector('[data-fly]'),resumeFly=root.querySelector('[data-resume-fly]'),fullscreenButton=root.querySelector('[data-fullscreen]');
+const stage=root.querySelector('.pg-stage'),viewport=root.querySelector('.pg-viewport'),gpuCanvas=root.querySelector('[data-gpu]'),cpuImage=root.querySelector('[data-cpu]'),renderStatus=root.querySelector('[data-render-status]'),pauseButton=root.querySelector('[data-pause]'),playButton=root.querySelector('[data-play]'),motion=root.querySelector('[data-motion]'),flyButton=root.querySelector('[data-fly]'),fullscreenButton=root.querySelector('[data-fullscreen]');
 const parts=[...unpack(packed),...makeGateContext()],initialPose={stroke:0,angle:0,turn:0};
 const partLabels={postTube:'Fixed post',gateTube:'Gate tube',outsidePlate:'Outside plate',insidePlate:'Inside plate',keypad:'Keypad + knob',lockCase:'Inside lock case',actuator:'Inside actuator',bolt:'Sliding bolt',keeper:'Keeper',postStop:'Post stop',gateStop:'Gate stop'};
 const partFinishes={postTube:[0],gateTube:[1],outsidePlate:[2],insidePlate:[17],keypad:[8,19,9,20],lockCase:[3],actuator:[7],bolt:[4],keeper:[5],postStop:[6],gateStop:[18]};
@@ -8,7 +8,7 @@ let background=[232,234,237],az=-.35,el=.16,zoom=1,seq=0,quality='balanced',paus
 let samples=0,backend='CPU',gpu=null,scene=null,camera=null,sceneDirty=true,renderJob=0,debounce=0,previewJob=0,animationJob=0,lastPose='',imageData=null,accum=null,pixel=0,renderW=0,renderH=0;
 let fitPending=true,orbitCenter=[39,0,0],orbitRadius=500,flyMode=true,flyActive=false,flyPosition=[0,-500,0],flySpeed=600,flightJob=0,flightTime=0,locked=false,expanded=false,lastPreviewTime=0;
 const held=new Set(),flightKeys=new Set(['KeyW','KeyA','KeyS','KeyD','KeyE','KeyQ','ShiftLeft','ShiftRight','ControlLeft','ControlRight']);
-let fullscreenAvailable=typeof root.requestFullscreen==='function'&&document.fullscreenEnabled===true;
+let fullscreenAvailable=typeof viewport.requestFullscreen==='function'&&document.fullscreenEnabled===true,suppressClick=false,bodyOverflow='';
 function readTheme(){
  const swatch=document.createElement('span');swatch.style.color='var(--background)';swatch.style.display='none';root.appendChild(swatch);const str=getComputedStyle(swatch).color;swatch.remove();const m=str.match(/^rgba?\(([^)]+)\)/);if(m)background=m[1].split(/[,\s]+/).slice(0,3).map(Number);
  materials[13]=[.15,.125,.065,0,.9];
@@ -86,30 +86,30 @@ function startRefining(){
 function stopPlaying(){playing=false;cancelAnimationFrame(animationJob);playButton.textContent='Play mechanism';}
 function clearPreset(){root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed','false'));}
 function controlsHint(){
- root.dataset.mode=flyMode?'fly':'orbit';root.dataset.flyActive=String(flyActive);root.dataset.mouseCapture=locked?'locked':root.dataset.pointerFallback?'drag':'available';
- flyButton.setAttribute('aria-pressed',String(flyMode));flyButton.textContent=flyMode?'Exit fly':'Start fly (WASD)';resumeFly.hidden=!flyMode||flyActive;
+ root.dataset.mode=flyMode?'fly':'orbit';root.dataset.flyActive=String(flyActive);root.dataset.mouseCapture=locked?'locked':root.dataset.pointerFallback?'hover':'available';
+ flyButton.setAttribute('aria-pressed',String(flyMode));flyButton.textContent=flyMode?'Exit fly':'Start fly (WASD)';stage.setAttribute('aria-pressed',String(flyActive));
  root.querySelector('[data-flight-speed]').hidden=!flyMode;stage.classList.toggle('pg-flying',flyMode);stage.classList.toggle('pg-aiming',flyActive);
- root.querySelector('[data-controls-hint]').textContent=flyMode?(flyActive?`WASD move · Shift/E screen-up · Ctrl/Q screen-down · ${locked?'Mouse aim':'Drag to aim'} · Esc release`:'Fly mode · Click the view to use WASD'):'Drag to orbit · Scroll to zoom · Start fly for WASD';
+ root.querySelector('[data-controls-hint]').textContent=flyMode?(flyActive?'WASD move · Shift/E screen-up · Ctrl/Q screen-down · Mouse aim · Click to release · F fullscreen':'Click to fly · Click again to release · F fullscreen'):'Drag to orbit · Scroll to zoom · Start fly for WASD · F fullscreen';
 }
 function clearFlight(){held.clear();cancelAnimationFrame(flightJob);flightJob=0;flightTime=0;}
-function pauseFlight(){clearFlight();flyActive=false;drag=null;if(document.pointerLockElement===stage)document.exitPointerLock();controlsHint();requestPreview();}
+function pauseFlight(){clearFlight();flyActive=false;drag=null;stage.classList.remove('pg-dragging');if(document.pointerLockElement===stage)document.exitPointerLock();controlsHint();requestPreview();}
 function exitFly(){
  if(!flyMode)return;const a=axes();orbitRadius=200;zoom=1;orbitCenter=V.sub(flyPosition,V.mul(a.normal,orbitRadius));flyMode=false;pauseFlight();
 }
-function pointerFallback(){if(!flyMode||!flyActive)return;root.dataset.pointerFallback='true';controlsHint();announce('Mouse capture is unavailable here. Drag to aim; WASD moves, Shift or E moves toward the top of the view, and Control or Q toward the bottom.');}
+function pointerFallback(){if(!flyMode||!flyActive)return;root.dataset.pointerFallback='true';controlsHint();announce('Mouse capture is unavailable here. Move the mouse over the view to aim, or drag on a touchscreen. Click again to release movement.');}
 function captureMouse(){
  if(document.pointerLockElement===stage)return;
  if(root.dataset.pointerFallback==='true'){controlsHint();return;}
  if(typeof stage.requestPointerLock!=='function'){pointerFallback();return;}
  try{const p=stage.requestPointerLock();if(p&&typeof p.catch==='function')p.catch(pointerFallback);}catch{pointerFallback();}
 }
-function focusFlight(){flyButton.focus({preventScroll:true});}
+function focusFlight(){stage.focus({preventScroll:true});}
 function activateFly(){
  stopPlaying();clearPreset();if(!flyMode){updateScene();const [w,h]=dimensions(960),cam=viewCamera(w,h);flyPosition=V.add(cam.center,V.mul(cam.normal,cam.distance));flyMode=true;}
  flyActive=true;controlsHint();focusFlight();captureMouse();requestPreview();
 }
-flyButton.addEventListener('click',()=>{if(flyMode)exitFly();else activateFly();});resumeFly.addEventListener('click',e=>{e.stopPropagation();activateFly();});
-document.addEventListener('pointerlockchange',()=>{const was=locked;locked=document.pointerLockElement===stage;if(locked){flyActive=true;drag=null;stage.classList.remove('pg-dragging');delete root.dataset.pointerFallback;}else if(was){clearFlight();flyActive=false;drag=null;}controlsHint();requestPreview();});
+flyButton.addEventListener('click',()=>{if(flyMode)exitFly();else activateFly();});
+document.addEventListener('pointerlockchange',()=>{const was=locked;locked=document.pointerLockElement===stage;if(locked){if(!flyMode||!flyActive){document.exitPointerLock();return;}drag=null;stage.classList.remove('pg-dragging');delete root.dataset.pointerFallback;}else if(was){clearFlight();flyActive=false;drag=null;}controlsHint();requestPreview();});
 document.addEventListener('pointerlockerror',pointerFallback);
 function look(dx,dy){if(!dx&&!dy)return;az-=dx*.0026;el=Math.max(-1.54,Math.min(1.54,el+dy*.0026));clearPreset();requestPreview();}
 document.addEventListener('mousemove',e=>{if(flyMode&&flyActive&&locked)look(e.movementX,e.movementY);});
@@ -126,7 +126,9 @@ function movementCode(e){
  return ({w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',e:'KeyE',q:'KeyQ',shift:e.location===2?'ShiftRight':'ShiftLeft',control:e.location===2?'ControlRight':'ControlLeft'})[key]||'';
 }
 document.addEventListener('keydown',e=>{
- if((e.code==='Escape'||e.key==='Escape')&&(flyActive||expanded)){if(flyActive)pauseFlight();if(expanded){expanded=false;root.dataset.expanded='false';fullscreenChanged();}return;}
+ const editing=e.target.closest?.('input,select,textarea,[contenteditable="true"]');
+ if((e.code==='KeyF'||String(e.key).toLowerCase()==='f')&&!e.repeat&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&!editing&&(locked||root.contains(document.activeElement))){e.preventDefault();toggleFullscreen();return;}
+ if((e.code==='Escape'||e.key==='Escape')&&(flyActive||expanded)){if(flyActive)pauseFlight();if(expanded)setExpanded(false);return;}
  const code=movementCode(e);
  if(!flyMode||!flyActive||!code||e.altKey||e.metaKey||e.isComposing||(!locked&&(!root.contains(document.activeElement)||e.target.closest?.('input,select,textarea,[contenteditable="true"]'))))return;
  e.preventDefault();e.stopPropagation();held.add(code);stopRender();if(!flightJob)flightJob=requestAnimationFrame(flightTick);
@@ -134,20 +136,24 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('keyup',e=>{const code=movementCode(e);if(!held.has(code))return;e.preventDefault();e.stopPropagation();held.delete(code);if(!held.size){clearFlight();requestPreview();}},true);
 root.querySelector('[data-speed]').addEventListener('change',e=>{flySpeed=Number(e.target.value);});
 document.addEventListener('pointerdown',e=>{if(flyActive&&!stage.contains(e.target)&&e.target!==flyButton)pauseFlight();});
-document.addEventListener('focusin',e=>{if(flyActive&&!locked&&e.target!==flyButton&&e.target!==resumeFly)pauseFlight();});
+document.addEventListener('focusin',e=>{if(flyActive&&!locked&&e.target!==flyButton&&e.target!==stage)pauseFlight();});
 window.addEventListener('blur',()=>{if(flyActive)pauseFlight();else clearFlight();});
 function fullscreenChanged(){
- const full=document.fullscreenElement===root;root.dataset.fullscreen=String(full);root.dataset.fullscreenAvailable=String(fullscreenAvailable);fullscreenButton.textContent=full?'Exit fullscreen':expanded?'Collapse view':fullscreenAvailable?'Fullscreen':'Expand view';fullscreenButton.setAttribute('aria-pressed',String(full||expanded));
- root.querySelector('[data-display-note]').textContent=fullscreenAvailable?'':expanded?'Larger inline view · Fullscreen requires the browser version':'Embedded view · Fullscreen unavailable';
+ const full=document.fullscreenElement===viewport;root.dataset.fullscreen=String(full);root.dataset.fullscreenAvailable=String(fullscreenAvailable);fullscreenButton.textContent=full||expanded?'Exit fullscreen':'Fullscreen';fullscreenButton.setAttribute('aria-pressed',String(full||expanded));
+ root.querySelector('[data-display-note]').textContent=fullscreenAvailable?'':'Fullscreen uses the browser window on this device.';
  requestPreview();
 }
-fullscreenButton.addEventListener('click',async()=>{
- if(document.fullscreenElement===root){try{await document.exitFullscreen();}catch{}return;}
- if(expanded){expanded=false;root.dataset.expanded='false';fullscreenChanged();return;}
- try{if(!fullscreenAvailable)throw Error('Fullscreen not allowed');await root.requestFullscreen({navigationUI:'hide'});}
- catch{fullscreenAvailable=false;expanded=true;root.dataset.expanded='true';fullscreenChanged();announce('This embedded view cannot enter fullscreen. The view is enlarged; use the browser version for fullscreen.');}
-});
-document.addEventListener('fullscreenchange',fullscreenChanged);
+function setExpanded(value){expanded=value;root.dataset.expanded=String(value);if(value){bodyOverflow=document.body.style.overflow;document.body.style.overflow='hidden';focusFlight();}else{document.body.style.overflow=bodyOverflow;fullscreenButton.focus({preventScroll:true});}fullscreenChanged();}
+async function toggleFullscreen(){
+ if(flyActive)pauseFlight();
+ if(document.fullscreenElement===viewport){try{await document.exitFullscreen();}catch{}return;}
+ if(expanded){setExpanded(false);return;}
+ try{if(!fullscreenAvailable)throw Error('Fullscreen not allowed');await viewport.requestFullscreen({navigationUI:'hide'});focusFlight();}
+ catch{fullscreenAvailable=false;setExpanded(true);announce('Viewport fills the browser window. Press F or Escape to return.');}
+}
+fullscreenButton.addEventListener('click',toggleFullscreen);
+document.addEventListener('fullscreenchange',()=>{if(flyActive)pauseFlight();fullscreenChanged();if(document.fullscreenElement===viewport)focusFlight();else fullscreenButton.focus({preventScroll:true});});
+root.querySelector('[data-viewport-size]').addEventListener('change',e=>{viewport.style.setProperty('--viewport-width',e.target.value==='fit'?'100%':e.target.value+'px');requestPreview();});
 root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
  stopPlaying();if(flyActive)pauseFlight();az=button.dataset.view==='outside'?-.35:2.72;el=button.dataset.view==='top'?1.10:.16;zoom=1;seq=button.dataset.view==='open'?8:0;motion.value=String(seq);fitPending=true;
  root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));lastPose='';requestPreview();
@@ -165,13 +171,14 @@ root.querySelector('[data-light]').addEventListener('input',e=>{setLights(Number
 const partsBox=root.querySelector('[data-parts]');for(const [key,label] of Object.entries(partLabels)){
  const item=document.createElement('div');
  const row=document.createElement('label');row.className='form-check';const input=document.createElement('input');input.type='checkbox';input.checked=true;input.className='form-check-input';input.dataset.part=key;const text=document.createElement('span');text.className='form-check-label';text.textContent=label;row.append(input,text);item.appendChild(row);
- const ids=partFinishes[key],initial=Math.round((1-originalRoughness[ids[0]])*100);
+ const ids=partFinishes[key],baseline=Math.round((1-originalRoughness[ids[0]])*100),initial=95;
+ function setFinish(value){const delta=(value-baseline)/100;for(const id of ids)materials[id][4]=Math.max(.04,Math.min(1,originalRoughness[id]-delta));}
+ setFinish(initial);
  const caption=document.createElement('label');caption.className='form-label text-small pg-finish-label';caption.htmlFor=root.id+'-shine-'+key;
  const output=document.createElement('output');output.className='tabular-nums';output.value=initial+'%';caption.append('Shininess',output);
  const slider=document.createElement('input');slider.type='range';slider.className='form-range';slider.id=caption.htmlFor;slider.dataset.shininess=key;slider.min='0';slider.max='100';slider.step='1';slider.value=String(initial);slider.setAttribute('aria-label',label+' shininess');slider.setAttribute('aria-valuetext',initial+'% shininess');output.htmlFor=slider.id;
  slider.addEventListener('input',()=>{
-  const value=Number(slider.value),delta=(value-initial)/100;
-  for(const id of ids)materials[id][4]=Math.max(.04,Math.min(1,originalRoughness[id]-delta));
+  const value=Number(slider.value);setFinish(value);
   output.value=value+'%';slider.setAttribute('aria-valuetext',value+'% shininess');requestPreview();
  });
  item.append(caption,slider);partsBox.appendChild(item);
@@ -180,15 +187,15 @@ const partsBox=root.querySelector('[data-parts]');for(const [key,label] of Objec
 root.querySelectorAll('[data-context]').forEach(input=>input.addEventListener('change',()=>{partVisibility[input.dataset.context]=input.checked;sceneDirty=true;if(!flyMode){fitPending=true;zoom=1;}requestPreview();}));
 root.querySelector('[data-quality]').addEventListener('change',e=>{quality=e.target.value;requestPreview();});
 stage.addEventListener('pointerdown',e=>{
- if(e.target.closest('button')||e.button!==0)return;
- stopPlaying();stopRender();if(flyMode){e.preventDefault();focusFlight();flyActive=true;controlsHint();if(locked||document.pointerLockElement===stage)return;drag={x:e.clientX,y:e.clientY,fly:true};}else drag={x:e.clientX,y:e.clientY,az,el};
+ if(e.button!==0)return;suppressClick=false;
+ if(flyMode){if(!flyActive||locked||e.pointerType==='mouse')return;drag={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,fly:true};}else{stopPlaying();stopRender();drag={x:e.clientX,y:e.clientY,az,el};}
  stage.setPointerCapture(e.pointerId);stage.classList.add('pg-dragging');
- if(flyMode)captureMouse();
 });
-stage.addEventListener('pointermove',e=>{if(!drag)return;if(drag.fly){look(e.clientX-drag.x,e.clientY-drag.y);drag.x=e.clientX;drag.y=e.clientY;}else{az=drag.az+(e.clientX-drag.x)*.008;el=Math.max(-1.54,Math.min(1.54,drag.el+(e.clientY-drag.y)*.008));clearPreset();requestPreview();}});
+stage.addEventListener('click',e=>{if(e.button!==0||!flyMode||suppressClick)return;if(flyActive)pauseFlight();else activateFly();});
+stage.addEventListener('pointermove',e=>{if(!drag){if(flyMode&&flyActive&&!locked&&root.dataset.pointerFallback==='true'&&e.pointerType==='mouse')look(e.movementX,e.movementY);return;}if(drag.fly){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>4)suppressClick=true;look(e.clientX-drag.x,e.clientY-drag.y);drag.x=e.clientX;drag.y=e.clientY;}else{az=drag.az+(e.clientX-drag.x)*.008;el=Math.max(-1.54,Math.min(1.54,drag.el+(e.clientY-drag.y)*.008));clearPreset();requestPreview();}});
 function release(){if(!drag)return;drag=null;stage.classList.remove('pg-dragging');requestPreview();}
 stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',release);stage.addEventListener('lostpointercapture',release);
-stage.addEventListener('wheel',e=>{e.preventDefault();if(flyMode){flyPosition=V.add(flyPosition,V.mul(axes().normal,e.deltaY*.25));}else zoom=Math.max(.08,Math.min(30,zoom*Math.exp(-e.deltaY*.001)));requestPreview();},{passive:false});
+stage.addEventListener('wheel',e=>{if(flyMode&&!flyActive)return;e.preventDefault();if(flyMode){flyPosition=V.add(flyPosition,V.mul(axes().normal,e.deltaY*.25));}else zoom=Math.max(.08,Math.min(30,zoom*Math.exp(-e.deltaY*.001)));requestPreview();},{passive:false});
 gpuCanvas.addEventListener('webglcontextlost',e=>{e.preventDefault();stopRender();gpu=null;root.dataset.gpuFallback='WebGL context lost';graphicsStatus();requestPreview();});
 gpuCanvas.addEventListener('webglcontextrestored',()=>{try{gpu=createGPU(gpuCanvas);if(gpu&&skyImage.complete&&skyImage.naturalWidth)gpu.setSkyImage(skyImage);lastPose='';}catch(e){dropGPU(e);}graphicsStatus();requestPreview();});
 let lastSize='';if(typeof ResizeObserver==='function')new ResizeObserver(()=>{const k=stage.clientWidth+':'+stage.clientHeight;if(k!==lastSize){lastSize=k;requestPreview();}}).observe(stage);

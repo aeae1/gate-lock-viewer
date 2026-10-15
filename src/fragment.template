@@ -6,20 +6,22 @@
     <button class="btn" type="button" data-view="open" aria-pressed="false">Opening</button>
     <button class="btn" type="button" data-fly aria-pressed="true">Exit fly</button>
     <button class="btn" type="button" data-fullscreen aria-pressed="false">Fullscreen</button>
+    <label class="form-label">Viewport <select class="form-select" data-viewport-size aria-label="Viewport size"><option value="640">Small · 640 × 360</option><option value="960">Medium · 960 × 540</option><option value="1280">Large · 1280 × 720</option><option value="fit" selected>Fit width · 16:9</option></select></label>
   </div>
   <div class="viz-controls" aria-label="Whole gate context">
     <label class="form-check"><input class="form-check-input" type="checkbox" data-context="fullGate"><span class="form-check-label">Full gate frame</span></label>
     <label class="form-check"><input class="form-check-input" type="checkbox" data-context="fullPost"><span class="form-check-label">Full posts</span></label>
     <label class="form-check"><input class="form-check-input" type="checkbox" data-context="pickets"><span class="form-check-label">Pickets + rails</span></label>
   </div>
-  <div class="pg-stage" role="group" aria-label="Gate mechanism. Fly mode is on. Click the view for WASD movement. Shift or E moves toward the top of the view; Control or Q moves toward the bottom.">
+  <div class="pg-viewport">
+  <button type="button" class="pg-stage" aria-label="Gate mechanism. Click to enable mouse and WASD movement; click again to release. F toggles fullscreen. Shift or E moves toward the top of the view; Control or Q moves toward the bottom." aria-pressed="false">
     <canvas data-gpu role="img" aria-label="Gate mechanism cutaway with a single rotating actuator, flush keypad, rounded edges, and outdoor lighting."></canvas>
     <img data-cpu alt="Gate mechanism preview and progressive CPU rendering.">
-    <div class="pg-resume"><button class="btn" type="button" data-resume-fly>Click to move</button></div>
+  </button>
   </div>
   <div class="pg-footer">
     <div class="viz-row"><span data-render-status class="text-small tabular-nums" aria-label="Render status">Preparing view…</span></div>
-    <div class="text-small text-muted" data-controls-hint>Fly mode · Click the view to use WASD</div>
+    <div class="text-small text-muted" data-controls-hint>Click to fly · Click again to release · F fullscreen</div>
     <div class="text-small text-muted" data-display-note aria-live="polite"></div>
     <span class="sr-only" data-announcement aria-live="polite">Mechanism view ready.</span>
     <div class="viz-controls">
@@ -37,12 +39,11 @@
   </div>
 </div>
 <style>
-#gate-shininess-viewer .pg-stage{position:relative;height:520px;width:100%;touch-action:none;cursor:grab;margin:8px 0;overflow:hidden}
+#gate-shininess-viewer .pg-viewport{display:flex;align-items:center;justify-content:center;margin:8px 0}
+#gate-shininess-viewer .pg-stage{display:block;position:relative;width:100%;max-width:var(--viewport-width,100%);aspect-ratio:16/9;height:auto;flex-shrink:0;padding:0;border:0;background:var(--background);color:var(--foreground);touch-action:none;cursor:grab;overflow:hidden}
 #gate-shininess-viewer .pg-stage canvas,#gate-shininess-viewer .pg-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
 #gate-shininess-viewer .pg-stage.pg-flying{cursor:grab}
 #gate-shininess-viewer .pg-stage.pg-dragging{cursor:grabbing}
-#gate-shininess-viewer .pg-resume{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;pointer-events:none}
-#gate-shininess-viewer .pg-resume button{pointer-events:auto}
 #gate-shininess-viewer .pg-sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:12px}
 #gate-shininess-viewer .pg-part-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 20px;padding:12px 0}
 #gate-shininess-viewer .pg-finish-label{justify-content:space-between;margin-top:8px}
@@ -50,12 +51,10 @@
 #gate-shininess-viewer .pg-device{margin-top:8px;overflow-wrap:anywhere}
 #gate-shininess-viewer [data-display-note]:empty{display:none}
 #gate-shininess-viewer [hidden]{display:none!important}
-#gate-shininess-viewer[data-expanded="true"] .pg-stage{height:720px}
-#gate-shininess-viewer:fullscreen{display:flex;flex-direction:column;box-sizing:border-box;width:100%;height:100%;padding:12px 20px;background:var(--background);color:var(--foreground)}
-#gate-shininess-viewer:fullscreen .pg-stage{flex:1;min-height:160px;height:auto}
-#gate-shininess-viewer:fullscreen .pg-toolbar{flex:none}
-#gate-shininess-viewer:fullscreen .pg-footer{flex:none;max-height:42%;overflow:auto}
-@media(max-width:480px){#gate-shininess-viewer .pg-stage{height:410px}#gate-shininess-viewer .pg-sliders{grid-template-columns:1fr;gap:8px}}
+#gate-shininess-viewer .pg-viewport:fullscreen,#gate-shininess-viewer[data-expanded="true"] .pg-viewport{width:100vw;height:100vh;margin:0;background:var(--background)}
+#gate-shininess-viewer[data-expanded="true"] .pg-viewport{position:fixed;inset:0;z-index:2147483647}
+#gate-shininess-viewer .pg-viewport:fullscreen .pg-stage,#gate-shininess-viewer[data-expanded="true"] .pg-stage{width:min(100vw,calc(100vh * 16 / 9));max-width:none}
+@media(max-width:480px){#gate-shininess-viewer .pg-sliders{grid-template-columns:1fr;gap:8px}}
 </style>
 <script>
 (()=>{

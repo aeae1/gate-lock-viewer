@@ -18,7 +18,7 @@ If an email or messaging service refuses an HTML attachment, zip the HTML file f
 
 ## Controls
 
-Fly mode is selected by default. Click the scene to give it keyboard focus; click it again after using another control.
+Fly mode is selected by default. Click the scene to enable mouse and keyboard movement. Click again to release both controls and let the stationary view keep refining. The camera stays where you left it; another click resumes movement.
 
 | Control | Action |
 | --- | --- |
@@ -26,19 +26,23 @@ Fly mode is selected by default. Click the scene to give it keyboard focus; clic
 | A / D | Strafe left / right |
 | Shift or E | Strafe toward the top of the camera view |
 | Ctrl or Q | Strafe toward the bottom of the camera view |
-| Mouse | Aim when mouse capture is available; otherwise drag to aim |
-| Mouse wheel | Move forward/backward in fly mode; zoom in orbit mode |
-| Esc | Release flight controls and mouse capture |
+| Click the viewport | Toggle flight controls on/off without leaving fly mode |
+| Mouse | Aim while flight controls are active; touchscreens use drag |
+| Mouse wheel | Move forward/backward while flight controls are active; zoom in orbit mode |
+| Esc | Alternative way to release mouse capture or leave fullscreen |
 | Exit fly / Start fly | Switch between orbit and fly navigation |
-| Fullscreen | Fill the display in the standalone browser version |
+| Fullscreen / F | Show only the viewport; press F again or Esc to return |
+| Viewport size | Small (640 × 360), Medium (960 × 540), Large (1280 × 720), or Fit width |
 
 Shift/Ctrl follow the camera's axes: when looking down, they move across the ground instead of along world height. E/Q provide alternatives to combinations that a browser may reserve. There is no crosshair.
+
+Every viewport size uses a 16:9 aspect ratio and shrinks to fit smaller screens. Fullscreen hides all controls and fits the viewport inside the display, with space around it when the display has a different aspect ratio. Releasing mouse capture with a click keeps fullscreen open. F works while the viewer has keyboard focus.
 
 Fly speeds are **Slow: 180**, **Normal: 600** (default), and **Fast: 1,800** model millimetres per second. Diagonal movement is normalized.
 
 The view buttons preserve the selected navigation mode. Part checkboxes, full-gate checkboxes, opening animation, sky rotation, render detail and rendering pause are available below or above the scene.
 
-Expand **Mechanism parts** to adjust each part's **Shininess** from matte (0%) to polished (100%). Each slider starts at the current finish, changes the preview immediately, and restarts progressive refinement. The plates, stops, keypad, inside lock case and actuator have independent finishes. The tube controls also affect the full frame and posts. Colors, metal types, lettering and cutaway surfaces are preserved. Adjustments stay in the current view until the page is reloaded.
+Expand **Mechanism parts** to adjust each part's **Shininess** from matte (0%) to polished (100%). All eleven sliders start at **95%**, change the preview immediately, and restart progressive refinement. The plates, stops, keypad, inside lock case and actuator have independent finishes. The tube controls also affect the full frame and posts. Colors, metal types, lettering and cutaway surfaces are preserved. Adjustments stay in the current view until the page is reloaded.
 
 ## Rendering
 
@@ -46,7 +50,7 @@ The viewer draws a fast rasterized preview during movement, then progressively p
 
 The path tracer uses a triangle bounding-volume hierarchy, four-bounce paths, physically based metal/dielectric materials, environment lighting and multiple importance sampling. Rendering pauses when the view is hidden. Balanced, Sharp and Ultra increase the target resolution and sample count.
 
-Fullscreen and pointer lock depend on the containing page's permissions. Restricted embedded previews can block both; the standalone file offers the full browser controls.
+Fullscreen and pointer lock depend on browser support and permissions. If either is unavailable, fullscreen fills the browser window and mouse aiming works over the viewport while flight controls are active. A second click still releases movement.
 
 ## Edit and rebuild
 
