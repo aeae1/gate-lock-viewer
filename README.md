@@ -1,5 +1,7 @@
 # Gate lock viewer
 
+**[Open the interactive 3D viewer](https://aeae1.github.io/gate-lock-viewer/)**
+
 An interactive 3D viewer for the welded gate-lock mechanism. It includes the VEVOR keypad, sliding bolt, rotating inside actuator, mounting plates, keeper and stops, plus optional full gate framing, posts, wood pickets and polished copper pull handles.
 
 The painted tubes have a gloss finish; the keypad, lock case and controls have sharper metal reflections. The sky panorama supplies the background and reflections.
@@ -76,10 +78,8 @@ On Windows, `py build.py` also works when the Python launcher is installed. Open
 
 The design uses 2 7/8-inch tube, 0.21-inch wall, 1/4-inch plate, a corrected 5 mm gate/post gap, and an approximately 50-inch-wide gate. The keypad is attached to the moving gate. Full-height context and wood placement include estimates from the reference photos. This viewer is for examining the design and movement; it is not a fabrication drawing or a structural analysis.
 
-## Private repository and sharing
+## Publishing and sharing
 
-This repository is private. A repository URL alone does not grant access. Sharing the standalone HTML file does not grant access to the repository or its version history, but the file contains the model and viewer code needed to run it.
+The repository and hosted viewer are public. Share [the viewer link](https://aeae1.github.io/gate-lock-viewer/) with anyone; they can open it directly without a GitHub account or download. You can also send the standalone HTML file for offline viewing.
 
-A separately published website can be public while its source repository remains private. GitHub Pages supports private source repositories on eligible paid GitHub plans; the hosted page can still be public. No public deployment is enabled by this project.
-
-References: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages) and [repository visibility](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility).
+GitHub Pages publishes from the root of the `main` branch. After editing the sources, run `python3 build.py` and commit the rebuilt `index.html`; GitHub Pages deploys the committed file automatically. The `.nojekyll` file keeps the site as plain static files.
