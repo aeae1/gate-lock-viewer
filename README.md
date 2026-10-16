@@ -1,6 +1,6 @@
 # Gate lock viewer
 
-**[Open the interactive 3D viewer](https://aeae1.github.io/gate-lock-viewer/)**
+**[Open the interactive 3D viewer](https://aeae1.github.io/gate-lock-viewer/)** · **[Print cut template (PDF)](https://aeae1.github.io/gate-lock-viewer/print/gate-upright-cut-wrap-letter.pdf)**
 
 An interactive 3D viewer for the welded gate-lock mechanism. It includes the VEVOR keypad, sliding bolt, rotating inside actuator, mounting plates, keeper and stops, plus optional full gate framing, posts, wood pickets and polished copper pull handles.
 

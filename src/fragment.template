@@ -1,4 +1,8 @@
 <div id="gate-shininess-viewer">
+  <div class="viz-row" aria-label="Printable template">
+    <a class="btn" href="https://aeae1.github.io/gate-lock-viewer/print/gate-upright-cut-wrap-letter.pdf" target="_blank" rel="noopener">Print cut template (PDF)</a>
+    <span class="text-small text-muted">Letter · Landscape · 100% / Actual size</span>
+  </div>
   <div class="viz-controls pg-toolbar" aria-label="View controls">
     <button class="btn" type="button" data-view="inside" aria-pressed="false">Bolt side</button>
     <button class="btn" type="button" data-view="outside" aria-pressed="true">Keypad side</button>
