@@ -6,6 +6,18 @@ An interactive 3D viewer for the welded gate-lock mechanism. It includes the VEV
 
 The painted tubes have a gloss finish; the keypad, lock case and controls have sharper metal reflections. The sky panorama supplies the background and reflections.
 
+## Printable mounting-plate cut wrap
+
+**[Open the letter-size cut-wrap PDF](https://aeae1.github.io/gate-lock-viewer/print/gate-upright-cut-wrap-letter.pdf)**
+
+Page 1 wraps around the **moving gate's latch upright** and marks both recessed mounting-plate openings. Page 2 contains setup instructions, a full-size cross-section and print-scale gauges. Print on **letter paper, landscape, 100% / Actual size**; turn off Fit, Shrink and borderless expansion. Check the scale bars and actual tube/plate dimensions before marking.
+
+The template uses the supplied DXF's **52.93 × 152.90 mm** plate outline and **2-7/8-inch (73.025 mm) outside-diameter** pipe. It converts the plate width to a **59.207 mm surface arc**, rather than wrapping the flat plate outline onto the cylinder. Front/keypad, back/inside-lock, hinge-side and gap-side references are color coded. It includes seam alignment, plate mid-height and the spindle axis 47 mm below it. Installation height is chosen on the actual gate.
+
+Red lines indicate the nominal finished opening, with **no added kerf or weld clearance**. Rough-cut inside and fit the actual plate; finish the long cut faces in the flat seating plane shown in the PDF. The stationary keeper post uses different geometry and is not covered by this wrap.
+
+The reproducible drawing source is `tools/build_cut_wrap.py` (Python 3 + ReportLab). Measured and calculated dimensions are in `print/gate-upright-cut-wrap-dimensions.json`.
+
 ## Open it or send it to someone
 
 1. Download **index.html** using GitHub's download button on the file page.

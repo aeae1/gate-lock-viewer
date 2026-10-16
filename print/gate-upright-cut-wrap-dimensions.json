@@ -1,0 +1,23 @@
+{
+  "pipe_od_mm": 73.02499999999999,
+  "pipe_wall_mm": 5.334,
+  "plate_thickness_mm": 6.35,
+  "plate_width_mm": 52.93,
+  "plate_height_mm": 152.9,
+  "circumference_mm": 229.41480352839463,
+  "quarter_circumference_mm": 57.35370088209866,
+  "surface_window_width_mm": 59.206732966482186,
+  "seating_plane_from_axis_mm": 25.154849060370044,
+  "crown_to_plate_face_mm": 5.0076509396299524,
+  "spindle_below_plate_midheight_mm": 47,
+  "added_clearance_mm": 0,
+  "kerf_allowance_mm": 0,
+  "template_axes": [
+    "gap seam",
+    "front / keypad",
+    "hinge side",
+    "back / inside lock",
+    "gap seam"
+  ],
+  "source_dxf_sha256": "f3e1974f800dd2f8bc6a28a4b4e8a133715d3eeecd8c88105bcdef5fe847c3c6"
+}
